@@ -92,144 +92,119 @@ const isAuthenticated = (req, res, next) => {
   res.redirect("/login");
 };
 
-app.get("/", function (req, res) {
-  Post.find({})
-    .populate("author", "username")
-    .exec(function (err, posts) {
-      res.render("home", {
-        posts: posts,
-      });
+app.get("/", async function (req, res) {
+  try {
+    const posts = await Post.find({}).populate("author", "username");
+    res.render("home", {
+      posts: posts,
     });
+  } catch (err) {
+    console.log(err);
+    res.redirect("/");
+  }
 });
 
 app.get("/compose", isAuthenticated, function (req, res) {
   res.render("compose");
 });
 
-app.post("/compose", isAuthenticated, function (req, res) {
-  const post = new Post({
-    title: req.body.postTitle,
-    content: req.body.postBody,
-    author: req.user._id,
-  });
-
-  post.save(function (err) {
-    if (!err) {
-      res.redirect("/");
-    }
-  });
+app.post("/compose", isAuthenticated, async function (req, res) {
+  try {
+    const post = new Post({
+      title: req.body.postTitle,
+      content: req.body.postBody,
+      author: req.user._id,
+    });
+    await post.save();
+    res.redirect("/");
+  } catch (err) {
+    console.log(err);
+    res.redirect("/");
+  }
 });
 
-app.get("/posts/:postId", function (req, res) {
-  const requestedPostId = req.params.postId;
-
-  Post.findOne({ _id: requestedPostId })
-    .populate("author", "username")
-    .exec(function (err, post) {
-      if (err) {
-        console.log(err);
-        return res.redirect("/");
-      }
-      res.render("post", {
-        title: post.title,
-        content: post.content,
-        id: post._id,
-        author: post.author,
-        currentUser: req.user,
-      });
+app.get("/posts/:postId", async function (req, res) {
+  try {
+    const post = await Post.findOne({ _id: req.params.postId }).populate(
+      "author",
+      "username"
+    );
+    res.render("post", {
+      title: post.title,
+      content: post.content,
+      id: post._id,
+      author: post.author,
+      currentUser: req.user,
     });
+  } catch (err) {
+    console.log(err);
+    res.redirect("/");
+  }
 });
 
 // Edit post route
-app.get("/edit/:postId", isAuthenticated, function (req, res) {
-  const requestedPostId = req.params.postId;
-
-  Post.findOne({ _id: requestedPostId })
-    .populate("author", "username")
-    .exec(function (err, post) {
-      if (err) {
-        console.log(err);
-        return res.redirect("/");
-      }
-      // Check if the current user is the author
-      if (
-        post.author &&
-        post.author._id.toString() !== req.user._id.toString()
-      ) {
-        req.flash("error", "You can only edit your own posts");
-        return res.redirect("/posts/" + requestedPostId);
-      }
-      res.render("edit", {
-        title: post.title,
-        content: post.content,
-        id: post._id,
-      });
+app.get("/edit/:postId", isAuthenticated, async function (req, res) {
+  try {
+    const post = await Post.findOne({ _id: req.params.postId }).populate(
+      "author",
+      "username"
+    );
+    if (post.author && post.author._id.toString() !== req.user._id.toString()) {
+      req.flash("error", "You can only edit your own posts");
+      return res.redirect("/posts/" + req.params.postId);
+    }
+    res.render("edit", {
+      title: post.title,
+      content: post.content,
+      id: post._id,
     });
+  } catch (err) {
+    console.log(err);
+    res.redirect("/");
+  }
 });
 
 // Update post route
-app.post("/edit/:postId", isAuthenticated, function (req, res) {
-  const requestedPostId = req.params.postId;
+app.post("/edit/:postId", isAuthenticated, async function (req, res) {
+  try {
+    const post = await Post.findOne({ _id: req.params.postId }).populate(
+      "author",
+      "username"
+    );
+    if (post.author && post.author._id.toString() !== req.user._id.toString()) {
+      req.flash("error", "You can only edit your own posts");
+      return res.redirect("/posts/" + req.params.postId);
+    }
 
-  Post.findOne({ _id: requestedPostId })
-    .populate("author", "username")
-    .exec(function (err, post) {
-      if (err) {
-        console.log(err);
-        return res.redirect("/");
-      }
-      // Check if the current user is the author
-      if (
-        post.author &&
-        post.author._id.toString() !== req.user._id.toString()
-      ) {
-        req.flash("error", "You can only edit your own posts");
-        return res.redirect("/posts/" + requestedPostId);
-      }
-
-      Post.findByIdAndUpdate(
-        requestedPostId,
-        {
-          title: req.body.postTitle,
-          content: req.body.postBody,
-        },
-        function (err) {
-          if (err) {
-            console.log(err);
-          }
-          res.redirect("/posts/" + requestedPostId);
-        }
-      );
+    await Post.findByIdAndUpdate(req.params.postId, {
+      title: req.body.postTitle,
+      content: req.body.postBody,
     });
+    res.redirect("/posts/" + req.params.postId);
+  } catch (err) {
+    console.log(err);
+    res.redirect("/");
+  }
 });
 
 // Delete post route
-app.post("/delete/:postId", isAuthenticated, function (req, res) {
-  const requestedPostId = req.params.postId;
+app.post("/delete/:postId", isAuthenticated, async function (req, res) {
+  try {
+    const post = await Post.findOne({ _id: req.params.postId }).populate(
+      "author",
+      "username"
+    );
+    if (post.author && post.author._id.toString() !== req.user._id.toString()) {
+      req.flash("error", "You can only delete your own posts");
+      return res.redirect("/posts/" + req.params.postId);
+    }
 
-  Post.findOne({ _id: requestedPostId })
-    .populate("author", "username")
-    .exec(function (err, post) {
-      if (err) {
-        console.log(err);
-        return res.redirect("/");
-      }
-      // Check if the current user is the author
-      if (
-        post.author &&
-        post.author._id.toString() !== req.user._id.toString()
-      ) {
-        req.flash("error", "You can only delete your own posts");
-        return res.redirect("/posts/" + requestedPostId);
-      }
-
-      Post.findByIdAndRemove(requestedPostId, function (err) {
-        if (err) {
-          console.log(err);
-        }
-        res.redirect("/");
-      });
-    });
+    await Post.findByIdAndDelete(req.params.postId);
+    res.redirect("/");
+  } catch (err) {
+    console.log(err);
+    res.redirect("/");
+  }
 });
 
 app.get("/about", function (req, res) {
@@ -338,5 +313,5 @@ app.get("/myposts", isAuthenticated, function (req, res) {
 });
 
 app.listen(process.env.PORT || 3000, function () {
-  console.log(`Server started on port ${process.env.PORT || 3000}`);
+  console.log("Server started on port 3000");
 });
