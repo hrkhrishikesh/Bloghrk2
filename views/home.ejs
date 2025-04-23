@@ -1,24 +1,42 @@
-
 <%- include("partials/header"); -%>
 
-    <u><h1 class="home">Home</h1></u>
-    <br>
-    <p align="center" style="font-family:Sans-serif"> <%= startingContent %> </p>
-<br>
+  <div class="welcome-section">
+    <div class="welcome-content">
+      <h1>Welcome to My Diary</h1>
+      <p>Your space to share thoughts, updates, and stories</p>
+    </div>
+  </div>
 
+  <div class="container">
+    <div class="row">
+      <% posts.forEach(function(post){ %>
+        <div class="col-md-6 mb-4">
+          <div class="card post-card">
+            <div class="card-body">
+              <h1 class="card-title">
+                <%=post.title%>
+                  <% if (post.author) { %>
+                    <small>
+                      <i class="fas fa-user"></i>
+                      <%= post.author.username %>
+                    </small>
+                    <% } %>
+              </h1>
 
-  <%  posts.forEach(function(post){ %>
+              <p class="card-text">
+                <%=post.content.substring(0, 100) + " ..." %>
+              </p>
 
-    <h1><%=post.title%></h1>
-    
-    <p>
-    <%=post.content.substring(0, 100) + " ..."%>
-    <a href="/posts/<%=post._id%>">Read More</a>
-    </p>
+              <div class="post-footer">
+                <a href="/posts/<%=post._id%>" class="btn btn-primary">
+                  <i class="fas fa-book-reader"></i> Read More
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+    </div>
+  </div>
 
-    <% }) %>
-
-  
-
-
-<%- include("partials/footer"); -%>
+  <%- include("partials/footer"); -%>

@@ -1,4 +1,58 @@
 <%- include("partials/header"); -%>
-    <h1>Contact</h1>
-    <p> <%= contactContent %> </p>
-<%- include("partials/footer"); -%>
+    <div class="container">
+        <h1 class="mb-4">Contact Us</h1>
+
+        <% if (locals.success && success.length> 0) { %>
+            <div class="alert alert-success">
+                Your message has been sent successfully! We'll get back to you soon.
+            </div>
+            <% } %>
+
+                <% if (locals.error && error.length> 0) { %>
+                    <div class="alert alert-danger">
+                        <%= error %>
+                    </div>
+                    <% } %>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <form action="/contact" method="POST">
+                                    <div class="form-group mb-3">
+                                        <label for="name">Name</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="email">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="subject">Subject</label>
+                                        <input type="text" class="form-control" id="subject" name="subject" required>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="message">Message</label>
+                                        <textarea class="form-control" id="message" name="message" rows="5"
+                                            required></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Send Message</button>
+                                </form>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Other Ways to Reach Us</h5>
+                                        <p class="card-text">
+                                            <i class="fas fa-envelope"></i> Email: kumar.hrishikesh27@gmail.com<br>
+                                            <i class="fas fa-map-marker-alt"></i> Address: Jamshedpur, Jharkhand, India
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    </div>
+    <%- include("partials/footer"); -%>
