@@ -298,18 +298,16 @@ app.get("/logout", (req, res) => {
 });
 
 // My Posts route
-app.get("/myposts", isAuthenticated, function (req, res) {
-  Post.find({ author: req.user._id })
-    .populate("author", "username")
-    .exec(function (err, posts) {
-      if (err) {
-        console.log(err);
-        return res.redirect("/");
-      }
-      res.render("myposts", {
-        posts: posts,
-      });
+app.get("/myposts", isAuthenticated, async function (req, res) {
+  try {
+    const posts = await Post.find({ author: req.user._id }).populate("author", "username");
+    res.render("myposts", {
+      posts: posts,
     });
+  } catch (err) {
+    console.log(err);
+    res.redirect("/");
+  }
 });
 
 app.listen(process.env.PORT || 3000, function () {
