@@ -216,30 +216,29 @@ app.get("/contact", function (req, res) {
 });
 
 // Handle contact form submission
-app.post("/contact", function (req, res) {
-  const contact = new Contact({
-    name: req.body.name,
-    email: req.body.email,
-    subject: req.body.subject,
-    message: req.body.message,
-  });
+app.post("/contact", async function (req, res) {
+  try {
+    const contact = new Contact({
+      name: req.body.name,
+      email: req.body.email,
+      subject: req.body.subject,
+      message: req.body.message,
+    });
 
-  contact.save(function (err) {
-    if (err) {
-      console.log(err);
-      req.flash(
-        "error",
-        "There was an error sending your message. Please try again."
-      );
-      res.redirect("/contact");
-    } else {
-      req.flash(
-        "success",
-        "Your message has been sent successfully! We'll get back to you soon."
-      );
-      res.redirect("/contact");
-    }
-  });
+    await contact.save(); 
+    req.flash(
+      "success",
+      "Your message has been sent successfully! We'll get back to you soon."
+    );
+    res.redirect("/contact");
+  } catch (err) {
+    console.log(err);
+    req.flash(
+      "error",
+      "There was an error sending your message. Please try again."
+    );
+    res.redirect("/contact");
+  }
 });
 
 // Authentication routes
